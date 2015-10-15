@@ -5,10 +5,10 @@ import nltk;
 from nltk import sent_tokenize, word_tokenize, pos_tag
 
 #define a list of Stop Words to be removed from token list
-STOPWORDS = ["a","an","the","is"]
+STOPWORDS = ["a","an","the","is","are"]
 
 #define regex patterns to remove from token list
-REMOVEPATTERN = ['[! \. ,]+']
+REMOVEPATTERN = ['[! \. ,]+','[\d]+']
 REMOVETAGS = ['@.*','#.*']
 
 #tweet counter
@@ -40,9 +40,11 @@ def writeToFile(processedTweet):
 	f.write(processedTweet+'\n')
 
 if __name__ == "__main__":
-	text = '@mycola Hello dere #obama This is  Eindhoven university...lets say somethin abt d city eindhoven.!!!\n it is in nethelands nd  the city is vry nice!,, the weathr is soo cold nowaday!. and v have classes in d mornin. and so many assignmnts which takes most of our time whch realy sucks #barack @mark.'
+	#text = '@mycola Hello dere #obama This is  Eindhoven university...lets say somethin abt d city eindhoven.!!!\n it is in nethelands nd  the city is vry nice!,, the weathr is soo cold nowaday!. and v have classes in d mornin. and so many assignmnts which takes most of our time whch realy sucks #barack @mark.'
+	f = open(sys.argv[1],'r')
+	text = f.read()
+	#sys.exit(1)
 	tweetList = text.lower().split('\n')
-	tweetList = cleanTokenList(tweetList)
 	os.system(CMD)
 	for tweet in tweetList:
 		print tweet
@@ -52,3 +54,9 @@ if __name__ == "__main__":
 	##remove unnecessary strings
 		tokenListClean = cleanTokenList(tokenListNoSW)
 		writeToFile(' '.join(tokenListClean))
+"""
+tweets processing
+"""
+
+
+

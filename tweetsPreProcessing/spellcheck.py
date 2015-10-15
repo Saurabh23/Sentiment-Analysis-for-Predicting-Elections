@@ -39,9 +39,7 @@ def correct_top(word, n):
     return s[0], s[:n]
 
 def removeBlankLines(lines):
-    for line in lines:
-	if (line==''):
-            lines.remove(line)
+    lines = [var for var in lines if var!='']
     return lines
 
 if __name__ == "__main__":
