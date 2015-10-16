@@ -1,3 +1,4 @@
+import spellcheck
 import sys;
 import re;
 import os;
@@ -8,7 +9,7 @@ from nltk import sent_tokenize, word_tokenize, pos_tag
 STOPWORDS = ["a","an","the","is","are"]
 
 #define regex patterns to remove from token list
-REMOVEPATTERN = ['[! \. ,]+','[\d]+']
+REMOVEPATTERN = ['[< > ! \. , \"]+','[\d]+']
 REMOVETAGS = ['@.*','#.*']
 
 #tweet counter
@@ -40,7 +41,6 @@ def writeToFile(processedTweet):
 	f.write(processedTweet+'\n')
 
 if __name__ == "__main__":
-	#text = '@mycola Hello dere #obama This is  Eindhoven university...lets say somethin abt d city eindhoven.!!!\n it is in nethelands nd  the city is vry nice!,, the weathr is soo cold nowaday!. and v have classes in d mornin. and so many assignmnts which takes most of our time whch realy sucks #barack @mark.'
 	f = open(sys.argv[1],'r')
 	text = f.read()
 	#sys.exit(1)
@@ -54,6 +54,7 @@ if __name__ == "__main__":
 	##remove unnecessary strings
 		tokenListClean = cleanTokenList(tokenListNoSW)
 		writeToFile(' '.join(tokenListClean))
+	spellcheck.main()
 """
 tweets processing
 """

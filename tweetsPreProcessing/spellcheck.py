@@ -12,7 +12,7 @@ def train(features):
         model[f] += 1
     return model
 
-NWORDS = train(words(file('./data/corpus.txt').read()))
+NWORDS = train(words(file('./data/corpus-words.txt').read()))
 alphabet = 'abcdefghijklmnopqrstuvwxyz'
 
 def edits1(word):
@@ -42,7 +42,9 @@ def removeBlankLines(lines):
     lines = [var for var in lines if var!='']
     return lines
 
-if __name__ == "__main__":
+#if __name__ == "__main__":
+def main():
+    COUNT = 0
     preprocessedTweetsSpellCorr = 'preprocessedTweetsSpellCorr.csv'
     if os.path.isfile(preprocessedTweetsSpellCorr):
         os.system(CMD)
@@ -52,6 +54,8 @@ if __name__ == "__main__":
     lines = line.split('\n') 
     lines = removeBlankLines(lines)   
     for l in lines:
+	COUNT = COUNT + 1
+	print 'correting tweet', COUNT
         for c in l.split(' '):
     	    c = correct(c)
             fw.write(c+' ')
