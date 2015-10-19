@@ -13,15 +13,19 @@ def collectPOSTAGS():
 def main(filename):
 	f = open(filename, 'r+')
 	text = f.read()
-	tweets = text.split('/n')
+	text = ''.join((c for c in text if 0 < ord(c) < 127))
+	tweets = text.split('\n')
 	tags = collectPOSTAGS()
-	print tags
+	fwtags = open(filename.split('.')[0]+'-selectedtags.csv','w')
 	for tweet in tweets:
 		words = word_tokenize(tweet)
 		taggedWords = pos_tag(words)
-		print taggedWords
 		taggedWords = [tag for tag in taggedWords if tag[1] in tags]
-		print taggedWords
+		bagofwords = ' '.join([w[0] for w in taggedWords])
+		if tweet != '':
+			fwtags.write(tweet+'>'+bagofwords+'\n')
+	f.close()
+	fwtags.close()
 
 if __name__ == "__main__":
 	main(sys.argv[1])

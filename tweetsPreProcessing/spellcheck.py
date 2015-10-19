@@ -43,13 +43,13 @@ def removeBlankLines(lines):
     return lines
 
 #if __name__ == "__main__":
-def main():
+def main(filename):
     COUNT = 0
-    preprocessedTweetsSpellCorr = 'preprocessedTweetsSpellCorr.csv'
-    if os.path.isfile(preprocessedTweetsSpellCorr):
-        os.system(CMD)
-    f = open('preprocessedTweets.csv','r')
-    fw = open(preprocessedTweetsSpellCorr,'a')
+    preprocessedTweetsSpellCorr = filename+'-spellcorrected.csv' #'preprocessedTweetsSpellCorr.csv'
+#    if os.path.isfile(preprocessedTweetsSpellCorr):
+#        os.system(CMD)
+    f = open(filename+'.csv','r')
+    fw = open(preprocessedTweetsSpellCorr,'w+')
     line = f.read()
     lines = line.split('\n') 
     lines = removeBlankLines(lines)   
