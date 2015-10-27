@@ -6,19 +6,23 @@ def main(filename,filenameTweetText,colName):
 	tweets = f.read().split('\n')
 
         cols = tweets[0].split(',')
-        print cols
+        print len(cols)
         index = 0
-        for i in range(0, len(cols) - 1):
+        for i in range(len(cols)):
             print cols[i]
-            if cols[i] == colName:
+            print colName
+            c = cols[i]
+            if c[1:len(c)-1] == colName:
+                
+                print "matched"
                 index = i
                 break
 
         print index
 	for tweet in tweets:
             t = tweet.split(',',len(cols) - 1)
-            print t
-            print len(t)
+            #print t
+            #print len(t)
 	    if len(t) > index:
 	    	fw.write(t[index]+'\n')
 

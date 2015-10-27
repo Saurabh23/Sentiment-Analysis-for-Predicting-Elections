@@ -1,4 +1,4 @@
-Ordinal,Tweets,cam_class_pol.POS,cam_class_pol.NEG,cam_class_pol.POS.NEG,Final Sentiment
+Ordinal,Tweets,cam_class_pol.POS,cam_class_pol.NEG,cam_class_pol.POS.NEG,FinalSentiment
 1,David Cameron for the second term #ElectionDay #VoteConservative,1.031277741,0.445453222,2.315120175,positive
 2,David Cameron's big plan. #bbcqt 34 retweets 17 favourites pic.twitter.com/bVI1pUZzF1,1.031277741,0.445453222,2.315120175,positive
 3,@OwenJones84 will you support my petition to try and offset David Cameron's potential coup? https://www.change.org/p/david-cameron-mp-respect-the-general-election-result��,33.42175257,17.81233968,1.876325804,neutral
