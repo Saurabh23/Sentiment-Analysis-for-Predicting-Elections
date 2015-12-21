@@ -1,107 +1,156 @@
 library(tm)
-handleTweetsData <- function(vsrc) { 
-  # tweetVector <- VectorSource(conservative$Tweet)
-  myCorpus <- Corpus(vsrc)
-  camCorpus<- Corpus(cameronVector)
-  milCorpus <- Corpus(millibandVector)
-  mixedCorpus <- Corpus(mixed)
-  # myCorpus <- tm_map(myCorpus, content_transformer(tolower))
-  # myCorpus <- tm_map(myCorpus, removePunctuation)
-  # myCorpus <- tm_map(myCorpus, removeNumbers)
-  # myCorpus <- tm_map(myCorpus, removeURL)
-  # myStopwords <- c(stopwords("english"), "available", "via")
-  # myStopwords <- setdiff(myStopwords, c("r", "big"))
-  # myCorpus <- tm_map(myCorpus, removeWords, myStopwords)
-  
-  # myCorpusCopy <- myCorpus
-  # myCorpus <- tm_map(myCorpus, stemDocument)
-  
-  # for(i in 1:5) {
-    # cat(paste("[[", i, "]]", sep = ""))
-    # writeLines(myCorpus[[i]])
-  # }
-  
-  # myCorpus <- tm_map(myCorpus, stemCompletion, dictionary = myCorpusCopy)
-  
-  # tdm <- TermDocumentMatrix(myCorpus, control = list(wordLengths = c(1, Inf)))
-  
-  cam_tdm <- TermDocumentMatrix(camCorpus, control = list());
-  mil_tdm <- TermDocumentMatrix(milCorpus, control = list());
-  mixed_tdm <- TermDocumentMatrix(mixedCorpus, control = list());
-  dtm <- DocumentTermMatrix(myCorpus, control = list(tolower = TRUE,
-                                                    removePunctuation = TRUE, 
-                                                    stopwords = TRUE,
-                                                    removeNumbers = TRUE,
-                                                    stemCompletion = TRUE,
-                                                    stemDocument = TRUE))
-  
-  cam_tdm2 <- removeSparseTerms(cam_tdm, sparse = 0.98)
-  dtm2 <- removeSparseTerms(dtm, sparse = 0.98)
-  # m2 <- as.matrix(tdm2)
-  cam_matrix <- as.matrix(cam_tdm2)
-  distMatrix <- dist(scale(cam_matrix))
-  fit <- hclust(distMatrix)
-  plot(fit)
-  
-  
-  mil_dtm2 <- removeSparseTerms(mil_tdm, sparse = 0.98)
-  mil_matrix <- as.matrix(mil_dtm2)
-  distMatrix2 <- dist(scale(mil_matrix))
-  fit2 <- hclust(distMatrix2)
-  plot(fit2)
-  
-  
-  mixed_tdm2 <- removeSparseTerms(mixed_tdm, sparse = 0.98)
-  mixed_matrix <- as.matrix(mixed_tdm2)
-  distMatrix3 <- dist(scale(mixed_matrix))
-  fit3 <- hclust(distMatrix3)
-  plot(fit3)
-  
-  
-  m3 <- t(mixed_matrix)
-  set.seed(1230)
-  k <- 2
-  kmeansResult <- kmeans(m3, k)
-  round(kmeansResult$centers, digits = 3)
-  
-  for(i in 1:k) {
-    cat(paste("cluster", i, ": ", sep = ""))
-    s <- sort(kmeansResult$centers[i,], decreasing = T)
-    # cat(cameron$Text[names(s)[1:5]], "\n")
-    cat(names(s)[1:50], "\n")
+
+cameron <- read.csv("~/TUE/Quartile1/IRandDM/SentimentAnalysis/WebIR-Full/Data/tweets_CAM.csv", sep = ",")
+miliband <- read.csv("~/TUE/Quartile1/IRandDM/SentimentAnalysis/WebIR-Full/Data/Milliband_Tweet.csv", sep = ",")
+
+k <- length(cameron$Text) + length(miliband$Text)
+list <- list()
+for(i in 1:k) {
+  tweet <- ""
+  if (i <= length(cameron$Text)) {
+    tweet <- as.String(cameron$Text[i])
+  } else {
+    tweet <- as.String(miliband$Text[i])
   }
+  list[i] <- tweet
 }
 
-  pos = scan("~/TUE/IRandDM/SentimentAnalysis/WebIR-Full/tweetsPreProcessing/data/positive-words.txt", what = 'character', comment.char = ';')
-  neg = scan("~/TUE/IRandDM/SentimentAnalysis/WebIR-Full/tweetsPreProcessing/data/negative-words.txt", what = 'character', comment.char = ';')
-  pos.words <- c(pos, 'upgrade')
-  neg.words <- c(neg, 'wtf', 'wait', 'waiting', 'epicfail', 'mechanical')
-  conservative <- read.csv("TUE/IRandDM/SentimentAnalysis/WebIR-Full/Data/tweets_conservative_party.csv", sep = "\t")
-  conservativeTweets <- conservative["Tweet"]
-  cameron <- read.csv("~/TUE/IRandDM/SentimentAnalysis/CAM.csv", stringsAsFactors = FALSE) 
-  milliband <- read.csv("~/TUE/IRandDM/SentimentAnalysis/MIL.csv", stringsAsFactors = FALSE) 
-  mixed_data <- read.csv("~/TUE/IRandDM/SentimentAnalysis/Mixed.csv", stringsAsFactors = FALSE) 
-  cameronVector <- VectorSource(cameron$text)
-  millibandVector <- VectorSource(milliband$text)
-  mixed <- VectorSource(mixed$text)
-  test <- read.csv("TUE/IRandDM/SentimentAnalysis/mixed_test.csv", sep = ",")
-  
-  sortedCameron <- cameron[order(cameron$UserName, cameron$Favorites, cameron$Retweets), ]
-  
-  
-  cameron <- read.csv("~/TUE/IRandDM/SentimentAnalysis/WebIR-Full/Data/final_dave_tweets.csv", stringsAsFactors = FALSE) 
-  milliband <- read.csv("~/TUE/IRandDM/SentimentAnalysis/MIL.csv", stringsAsFactors = FALSE)
-  
-  camer
+text <- lapply(list, factor)
+text <- as.factor(text)
+cameronVector <- VectorSource(cameron$Text)
+milibandVector <- VectorSource(miliband$Text)
+vector <- VectorSource(text)
 
-removeURL <- function(x) gsub('http\\S+\\s*','', x)
+myCorpus <- Corpus(vector)
 
+myCorpus <- tm_map(myCorpus,
+                   content_transformer(function(x)
+                     iconv(x, to = 'UTF-8', sub = 'byte')),
+                   mc.cores = 1)
+myCorpus <-
+  tm_map(myCorpus, content_transformer(removeURL), lazy = T)
+myCorpus <-
+  tm_map(myCorpus, content_transformer(removeReference), lazy = T)
+myCorpus <-
+  tm_map(myCorpus, content_transformer(removeHashTag), lazy = T)
+
+myCorpus <- tm_map(myCorpus, removePunctuation, lazy = T)
+myCorpus <- tm_map(myCorpus, stripWhitespace, lazy = T)
+myCorpus <-
+  tm_map(myCorpus, removeWords, stopwords("en"), lazy = T)
+
+myCorpus <-
+  tm_map(myCorpus, content_transformer(tolower), lazy = T)
+
+myCorpus.copy <- myCorpus
+myCorpus = myCorpus.copy
+myCorpus <- tm_map(myCorpus, content_transformer(stemDocument), lazy = T)
+myCorpus <- tm_map(myCorpus, content_transformer(stemCompletion),
+                   dictionary = myCorpus.copy, lazy = T)
+
+tdm <- TermDocumentMatrix(myCorpus)
+dtm <- DocumentTermMatrix(
+  myCorpus, control = list(
+    tolower = TRUE,
+    removePunctuation = TRUE,
+    stopwords = TRUE,
+    removeNumbers = TRUE,
+    stemCompletion = TRUE,
+    stemDocument = TRUE
+  )
+)
+
+idx <- which(dimnames(tdm)$Terms == "cameron")
+inspect(tdm[idx + (0:5), 101:110])
+
+freq.term <- findFreqTerms(tdm, lowfreq = 15)
+freq.term
+
+term.freq <- rowSums(as.matrix(tdm))
+term.freq <- subset(term.freq, term.freq >= 15)
+df <- data.frame(term = names(term.freq), freq = term.freq)
+library(ggplot2)
+ggplot(df, aes(x = term, y = freq)) + geom_bar(stat = "identity") +
+  xlab("Terms") + ylab("Count") + coord_flip()
+
+findAssocs(tdm, "cameron", 0.1)
+library(graph)
+
+tdm <- removeSparseTerms(tdm, sparse = 0.95)
+dtm2 <- removeSparseTerms(dtm, sparse = 0.98)
+# m2 <- as.matrix(tdm2)
+cam_matrix <- as.matrix(tdm)
+distMatrix <- dist(scale(cam_matrix))
+fit <- hclust(distMatrix, method = "ward")
+plot(fit)
+
+
+mil_dtm2 <- removeSparseTerms(mil_tdm, sparse = 0.98)
+mil_matrix <- as.matrix(mil_dtm2)
+distMatrix2 <- dist(scale(mil_matrix))
+fit2 <- hclust(distMatrix2)
+plot(fit2)
+
+
+mixed_tdm2 <- removeSparseTerms(mixed_tdm, sparse = 0.98)
+mixed_matrix <- as.matrix(mixed_tdm2)
+distMatrix3 <- dist(scale(mixed_matrix))
+fit3 <- hclust(distMatrix3)
+plot(fit3)
+
+
+m3 <- t(mixed_matrix)
+set.seed(1230)
+k <- 2
+kmeansResult <- kmeans(m3, k)
+round(kmeansResult$centers, digits = 3)
+
+for (i in 1:k) {
+  cat(paste("cluster", i, ": ", sep = ""))
+  s <- sort(kmeansResult$centers[i,], decreasing = T)
+  # cat(cameron$Text[names(s)[1:5]], "\n")
+  cat(names(s)[1:50], "\n")
+}
+
+pos = scan(
+  "~/TUE/IRandDM/SentimentAnalysis/WebIR-Full/tweetsPreProcessing/data/positive-words.txt", what = 'character', comment.char = ';'
+)
+neg = scan(
+  "~/TUE/IRandDM/SentimentAnalysis/WebIR-Full/tweetsPreProcessing/data/negative-words.txt", what = 'character', comment.char = ';'
+)
+pos.words <- c(pos, 'upgrade')
+neg.words <-
+  c(neg, 'wtf', 'wait', 'waiting', 'epicfail', 'mechanical')
+conservative <-
+  read.csv(
+    "TUE/IRandDM/SentimentAnalysis/WebIR-Full/Data/tweets_conservative_party.csv", sep = "\t"
+  )
+conservativeTweets <- conservative["Tweet"]
+millibandVector <- VectorSource(milliband$text)
+mixed <- VectorSource(mixed$text)
+test <-
+  read.csv("TUE/IRandDM/SentimentAnalysis/mixed_test.csv", sep = ",")
+
+sortedCameron <-
+  cameron[order(cameron$UserName, cameron$Favorites, cameron$Retweets),]
+
+camer
+
+removeURL <- function(x)
+  gsub('http\\S+\\s*','', x)
+removeHashTag <- function(x)
+  gsub('#\\S+\\s*','', x)
+removeReference <- function(x)
+  gsub('@\\S+\\s*', '', x)
+
+string <- "@eindhoven GLow Festival"
+string <- removeReference(string)
+rm(string)
 handleTweetsData(cameronVector)
 
-rm(myCorpus) 
-rm(myCorpusCopy)
-rm(tdm2)
-rm(tweets_conservative.df) 
-rm(conservative)
-rm(m2)
-rm(list=ls(all=TRUE))
+rm(list = ls(all = TRUE))
+rm(list = ls()[!(
+  ls() %in% c(
+    'top_frequency_terms','top_frequency_terms_2', 'top_frequency_terms_3'
+  )
+)])

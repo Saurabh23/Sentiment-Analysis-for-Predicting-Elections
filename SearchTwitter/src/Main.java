@@ -8,8 +8,8 @@ public class Main {
     public static void main(String[] args) {
         System.out.println("searching");
 
-        List<Tweet> tweets = TweetManager.getTweets(null, "2015-04-09", "2015-05-07", "nicola sturgeon", 10000);
+        List<Tweet> tweets = TweetManager.getTweets(null, "2015-11-01", "2015-12-13", "david cameron" , 10000);
 
-        TweetManager.exportToCSV(tweets, "\t");
+        TweetManager.exportToCSV(tweets, ";");
     }
 }

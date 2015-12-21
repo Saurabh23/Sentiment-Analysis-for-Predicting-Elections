@@ -107,11 +107,11 @@ public class TweetManager {
             writer.write("Date" + separator + "User" + separator + "Retweets" + separator + "Favourites" + separator + "Tweet" + "\n");
             for (Tweet tweet : tweets) {
                 System.out.println("*******************");
+                System.out.println(tweet.getDate());
                 System.out.println(tweet.getUsername());
                 System.out.println(tweet.getRetweets());
                 System.out.println(tweet.getFavorites());
                 System.out.println(tweet.getText());
-                System.out.println(tweet.getDate());
 
                 writer.write(tweet.getDate() + separator
                         + tweet.getUsername() + separator
