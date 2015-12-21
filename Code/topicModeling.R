@@ -1,58 +1,72 @@
 library(tm)
-cameron <- read.csv("~/TUE/Quartile1/IRandDM/SentimentAnalysis/WebIR-Full/Data/tweets_CAM.csv", sep = ",")
-miliband <- read.csv("~/TUE/Quartile1/IRandDM/SentimentAnalysis/WebIR-Full/Data/Milliband_Tweet.csv", sep = ",")
-cameronVector <- VectorSource(cameron$Text)
-milibandVector <- VectorSource(miliband$Text)
-vector <- VectorSource(list)
-myCorpus <- Corpus(vector)
-myCorpus <- Corpus(milibandVector)
-dtm <- DocumentTermMatrix(myCorpus, control = list(tolower = TRUE,
-                                                    removePunctuation = TRUE, 
-                                                    stopwords = TRUE,
-                                                    removeNumbers = TRUE,
-                                                    stemCompletion = TRUE))
-                                                    
 
-dtm <- removeSparseTerms(dtm, 0.99)
-library(topicmodels)
-
-rowTotals <- apply(dtm, 1, sum)
-dtm2.new <- dtm[rowTotals > 0,]
-dtm2.matrix <- as.matrix(dtm2.new)
-lda <- LDA(dtm2.new, k = 8)
-term <- terms(lda, 5)
-
-term <- apply(term, MARGIN = 2, paste, collapse = ", ")
-term
-topic <- topics(lda,1)
-
-k <- length(rowTotals)
-filteredDate <- list()
-for(i in 1 : k) {
-  if(rowTotals[i] > 0) {
-    if(i <= length(cameron$Text)) {
-      date <- as.String(cameron$Date[i])
-    } else {
-      date <- as.String(miliband$Date[i])
+#function for topic modeling, arguments: dataframe, stopword list, number of topics, number of terms
+performTopicModeling <- function(data, removeWordVector, nTopics, nTerms) {
+  require(tm)
+  require(topicmodels)
+  require(ggplot2)
+  
+  vector <- VectorSource(data$Text)
+  myCorpus <- Corpus(vector)
+  
+  #pre-processing
+  myCorpus <- tm_map(myCorpus,
+                     content_transformer(function(x)
+                       iconv(x, to = 'UTF-8', sub = 'byte')),
+                     mc.cores = 1)
+  myCorpus <-
+    tm_map(myCorpus, content_transformer(removeURL), lazy = T)
+  myCorpus <-
+    tm_map(myCorpus, content_transformer(removeReference), lazy = T)
+  myCorpus <-
+    tm_map(myCorpus, content_transformer(removeHashTag), lazy = T)
+  
+  myCorpus <- tm_map(myCorpus, removePunctuation, lazy = T)
+  myCorpus <- tm_map(myCorpus, stripWhitespace, lazy = T)
+  myCorpus <-
+    tm_map(myCorpus, removeWords, stopwords("en"), lazy = T)
+  myCorpus <-
+    tm_map(myCorpus, removeWords, removeWordVector, lazy = T)
+  myCorpus <-
+    tm_map(myCorpus, content_transformer(tolower), lazy = T)
+  
+  #create dtm, remove empty rows
+  dtm <- DocumentTermMatrix(myCorpus)
+  dtm <- removeSparseTerms(dtm, 0.99)
+  rowTotals <- apply(dtm, 1, sum)
+  dtm2.new <- dtm[rowTotals > 0,]
+  
+  #use LDA to cluster topics
+  lda <- LDA(dtm2.new, k = nTopics)
+  topic <- topics(lda,1)
+  
+  #extract representative terms for each topic
+  term <- terms(lda, nTerms)
+  term <- apply(term, MARGIN = 2, paste, collapse = ", ")
+  
+  #construct the date list, remove the dates corresponding to the empty rows above
+  k <- length(rowTotals)
+  filteredDate <- list()
+  for (i in 1:k) {
+    if (rowTotals[i] > 0) {
+      date <- as.String(data$Date[i])
+      filteredDate[length(filteredDate) + 1] <- date
     }
-    filteredDate[length(filteredDate) + 1] <- date
   }
+  
+  filteredDate <-
+    strptime(filteredDate,format("%a %b %d %H:%M:%M CEST %Y"))
+  topics <- data.frame(date = as.Date(filteredDate),topic)
+  qplot(
+    date, ..count..,data = topics, geom = "density", fill = term[topic]
+  )
 }
 
-filteredDate <- strptime(filteredDate,format("%a %b %d %H:%M:%M CEST %Y"))
-topics <- data.frame(date = as.Date(filteredDate),topic)
-library(ggplot2)
-qplot(date, ..count..,data = topics, geom = "density",fill = term[topic], xlab = "time", ylab = "density")
 
-today <- Sys.Date()
-today
-format(today, format("%a %b %d %H:%M:%M CEST %Y"))
-help("strptime")
-
-termS
-date <- as.factor("Thu May 07 01:59:55 CEST 2015")
-date = as.Date(date, format("%a %b %d %H:%M:%M CEST %Y"))
-date = as.Date("Aug 07 1989", format("%b %d %Y"))
-date
-
-rm(date.df)
+#Example
+cameron <- read.csv("~/TUE/Quartile1/IRandDM/SentimentAnalysis/WebIR-Full/Data/tweets_CAM.csv", sep = ",")
+removeWordVector = c("david", "cameron", "camerons", "miliband", "will", "can", "ge2015")
+performTopicModeling(data = cameron, 
+                     removeWordVector = removeWordVector,
+                     nTopics = 5,
+                     nTerms = 4)
