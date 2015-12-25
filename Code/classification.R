@@ -1,4 +1,4 @@
-rm(list= ls()[!(ls() %in% c('top_frequency_terms_merged', 'model.svm'))])
+rm(list= ls()[!(ls() %in% c('top_frequency_terms_merged', 'model'))])
 library(tm)
 
 ############## DAVID CAMERON ############################
@@ -6,10 +6,12 @@ cameron <- read.csv("~/TUE/Quartile1/IRandDM/SentimentAnalysis/WebIR-Full/Data/f
 miliband <- read.csv("~/TUE/Quartile1//IRandDM/SentimentAnalysis/WebIR-Full/Data/final_ed.csv", sep = ",")
 cameron <- read.csv("~/TUE/Quartile1/IRandDM/SentimentAnalysis/WebIR-Full/Data/Milliband_Tweet.csv", sep = ",")
 cameron <- read.csv("~/TUE/Quartile1/IRandDM/SentimentAnalysis/WebIR-Full/Data/tweets_CAM.csv", sep = ",")
+cameron <- read.csv("~/TUE/Quartile1/IRandDM/SentimentAnalysis/WebIR-Full/Data/SemEvalProcessed.csv", sep = "\t", quote = '\"')
 trainingSet <- read.csv("~/TUE/Quartile1/IRandDM/SentimentAnalysis/WebIR-Full/Data/trainingandtestdata/training.1600000.processed.noemoticon.csv")
 colnames(trainingSet) <- c("polarity", "id", "date", "query", "user", "text")
+summary(cameron)
 
-cameron.text <- as.data.frame(cameron$Tweets)
+cameron.text <- as.data.frame(cameron$Text)
 cameron.sentiment <- as.data.frame(cameron$FinalSentiment)
 miliband.text <- as.data.frame(miliband$Text)
 miliband.sentiment <- as.data.frame(miliband$Sentiment)
@@ -30,7 +32,7 @@ cameron <- as.data.frame(cameron[40001:50000, ])
 cameron <- as.data.frame(cameron[50001:56178, ])
 colnames(cameron) <- c("Tweets")
 
-cameronVector <- VectorSource(cameron$Tweets)
+cameronVector <- VectorSource(cameron$Text)
 top_frequency_terms_1 <- getTermFrequencyList(cameronVector)
 top_frequency_terms_2 <- getTermFrequencyList(cameronVector)
 top_frequency_terms_3 <- getTermFrequencyList(cameronVector)
@@ -41,6 +43,7 @@ top_frequency_terms_7 <- getTermFrequencyList(cameronVector)
 top_frequency_terms_8 <- getTermFrequencyList(cameronVector)
 top_frequency_terms_9 <- getTermFrequencyList(cameronVector)
 top_frequency_terms_10 <- getTermFrequencyList(cameronVector)
+top_frequency_terms_merged <- getTermFrequencyList(vector)
 
 trainingVector <- VectorSource(trainingSet$text)
 topFrequencyTerms <- getTermFrequencyList(trainingVector)
@@ -105,8 +108,8 @@ data <- data.frame(dtm2, "Final.Sentiment"=as.factor(cameron$Sentiment))
 data <- data.frame(matrix, "Final.Sentiment"=as.factor(mixed_final$Sentiment))
 
 #training and testing
-data_train <- data.frame(rbind(data[1:2000,], data[3001:5000,]))
-data_test <- data.frame(rbind(data[2001:3000,]))
+data_train <- data.frame(rbind(data[1:4000,], data[6001:7317,]))
+data_test <- data.frame(rbind(data[4001:6000,]))
 
 data_train <- data.frame(rbind(data[1:4000,], data[6001:10000,]))
 data_test <- data.frame(rbind(data[4001:6000,]))
@@ -117,6 +120,8 @@ table(data_test$Final.Sentiment)
 model = naiveBayes(as.factor(data_train$Final.Sentiment)~., data = data_train)
 model
 pred <-predict(model, data_test,
+               type = "class", threshold = 0.05)
+pred <-predict(model, matrix,
                type = "class", threshold = 0.05)
 #Classification table with test data
 conf.nb=table(pred, as.factor(data_test$Final.Sentiment))
@@ -138,8 +143,7 @@ pred=predict(model.svm, matrix)
 #Classification table with test data
 conf.svm <- table(pred, as.factor(data_test$Final.Sentiment))
 conf.svm <- table(pred)
-accuracy.svm <- sum(diag(conf.svm))/nrow(data_test) * 100
-sprintf("The accuracy of the model using SVM is %0.2f", accuracy.svm)
+accuracy.svm <- sum(diag(conf.svm))/nrow(data_test) * 100 sprintf("The accuracy of the model using SVM is %0.2f", accuracy.svm)
 conf.svm
 
 

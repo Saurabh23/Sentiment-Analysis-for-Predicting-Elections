@@ -17,6 +17,7 @@ for(i in 1:k) {
 
 text <- lapply(list, factor)
 text <- as.factor(text)
+text <- cameron$Text
 cameronVector <- VectorSource(cameron$Text)
 milibandVector <- VectorSource(miliband$Text)
 vector <- VectorSource(text)

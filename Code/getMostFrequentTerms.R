@@ -21,7 +21,8 @@ getTermFrequencyList <- function(vectorSource) {
   frequency <- sort(frequency, decreasing = TRUE)
   head(frequency)
   
-  top_frequency_terms <- frequency[1:500]
+  #top_frequency_terms <- frequency[1:500]
+  top_frequency_terms <- subset(frequency, frequency >= 15)
   top_frequency_terms <- as.list(rownames(as.matrix(top_frequency_terms)))
   
   return (top_frequency_terms)
