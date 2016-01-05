@@ -1,3 +1,12 @@
+#Pre-processing methods
+removeURL <- function(x)
+  gsub('http\\S+\\s*','', x)
+removeHashTag <- function(x)
+  gsub('#\\S+\\s*','', x)
+removeReference <- function(x)
+  gsub('@\\S+\\s*', '', x)
+
+#get most frequent terms
 getTermFrequencyList <- function(vectorSource) {
   myCorpus <- Corpus(vectorSource)
   myCorpus <- tm_map(myCorpus,

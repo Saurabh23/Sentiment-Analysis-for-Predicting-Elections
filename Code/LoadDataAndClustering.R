@@ -137,12 +137,6 @@ sortedCameron <-
 
 camer
 
-removeURL <- function(x)
-  gsub('http\\S+\\s*','', x)
-removeHashTag <- function(x)
-  gsub('#\\S+\\s*','', x)
-removeReference <- function(x)
-  gsub('@\\S+\\s*', '', x)
 
 string <- "@eindhoven GLow Festival"
 string <- removeReference(string)
