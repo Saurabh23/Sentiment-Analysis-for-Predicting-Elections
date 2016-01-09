@@ -1,4 +1,5 @@
 rm(list = ls(all = TRUE))
+library(tm)
 
 #LOADING pos and neg words
 pos = scan(
@@ -14,7 +15,7 @@ pos <- cbind(pos)
 posNegWords <- cbind(pos)
 posNegWords <- rbind(neg, pos)
 rm(neg, pos)
-posNegWords <- data.frame(posNegWords)
+posNegWords <- as.list(posNegWords)
 
 ##define constants
 MOST_FREQ_TERMS <- 15
@@ -27,6 +28,8 @@ TEST_2 <- 13000
 
 #LOAD TRAINING SET
 rawTrainingData <- read.csv("C:/Users/LENOVO/Desktop/TUE Lectures/Q1/WEB IR/WebIR-Full-master/Data/SemEvalProcessed.csv", sep = ",", quote = '\"')
+rawTrainingData <- read.csv("~/TUE/Quartile1/IRandDM/SentimentAnalysis/WebIR-Full/Data/SemEvalProcessed.csv"
+, sep = ",", quote = '\"')
 
 #Pre-processing methods
 removeURL <- function(x)
@@ -47,6 +50,7 @@ for(i in 1: k){
   text <- removeReference(text)
   text <- removeShortWords(text)
   text <- removeURL(text)
+  text <- tolower(text)
   textList[i] <- text
 }
 ##combine sentiment and tweet columns after preprocessing
@@ -78,7 +82,7 @@ myCorpus <- tm_map(myCorpus, removePunctuation, lazy = T)
 myCorpus <- tm_map(myCorpus, stripWhitespace, lazy = T)
 myCorpus <- tm_map(myCorpus, removeWords, stopwords("en"), lazy = T)
 myCorpus <- tm_map(myCorpus, removeWords, '#\\S+\\s*|@\\S+\\s*|http\\S+\\s*', lazy = T)
-myCorpus <- tm_map(myCorpus, content_transformer(tolower), lazy = T)
+#myCorpus <- tm_map(myCorpus, content_transformer(tolower), lazy = T)
 #Below words to be removed from most freq. list
 #myCorpus <- tm_map(myCorpus, removeWords, '\\\\u002c|\\\\u2019s|\\\\u2019m|\\\\u2019ll', lazy = T)
 
@@ -86,9 +90,10 @@ myCorpus
 myCorpus[[9]]$content
 
 #DOCUMENT-TERM MATRIX
-dtm <- DocumentTermMatrix(myCorpus)
+dtm <- DocumentTermMatrix(myCorpus, control = list(weighting=weightTfIdf))
+dtm.tf <- DocumentTermMatrix(myCorpus)
 #####change weighting to tf-idf etc; currently its tf
-
+dtm
 
 #EXTRACT MOST FREQUENT TEMRS
 getTermFrequencyList <- function(dtm, vectorSource, freq) {
@@ -112,7 +117,7 @@ getTermFrequencyList <- function(dtm, vectorSource, freq) {
 mostFrequentTerms <- getTermFrequencyList(dtm, trainingVector, MOST_FREQ_TERMS)
 
 #FILTER the terms in the DTM
-dtmFromMostFrequentTerms <- dtm[, colnames(dtm)%in%mostFrequentTerms]
+dtmFromMostFrequentTerms <- dtm[, colnames(dtm)%in%posNegWords]
 dtmFromMostFrequentTerms  ##Mostfreq words are 1662,but new filtered dtm shows 1383 terms?? 
 matrixFromMostFrequentTerms <- as.matrix(dtmFromMostFrequentTerms)
 ##TBD: remove dates(as day year month (numbers)) from most frequent terms
@@ -124,6 +129,11 @@ data <- data.frame(matrixFromMostFrequentTerms, "Final.Sentiment"=as.factor(rawT
 #training and testing
 dataTrain <- data.frame(rbind(data[1:1000,], data[4001:13583,]))
 dataTest <- data.frame(rbind(data[1001:4000,]))
+require(caTools)
+set.seed(101) 
+sample = sample.split(data$Final.Sentiment, SplitRatio = .75)
+dataTrain = subset(data, sample == TRUE)
+dataTest = subset(data, sample == FALSE)
 
 rm(matrixFromMostFrequentTerms,processedTrainingData,rawTrainingData)
 
