@@ -1,3 +1,19 @@
+#LOADING pos and neg words
+pos = scan(
+  "~/TUE/Quartile1/IRandDM/SentimentAnalysis/WebIR-Full/tweetsPreProcessing/data/positive-words.txt", what = 'character', comment.char = ';'
+)
+neg = scan(
+  "~/TUE/Quartile1/IRandDM/SentimentAnalysis/WebIR-Full/tweetsPreProcessing/data/negative-words.txt", what = 'character', comment.char = ';'
+)
+
+neg <- cbind(neg)
+pos <- cbind(pos)
+
+posNegWords <- cbind(pos)
+posNegWords <- rbind(neg, pos)
+rm(neg, pos)
+posNegWords <- data.frame(posNegWords)
+
 #LOAD TRAINING SET
 rawTrainingData <- read.csv("~/TUE/Quartile1/IRandDM/SentimentAnalysis/WebIR-Full/Data/SemEvalProcessed.csv", sep = ",", quote = '\"')
 
