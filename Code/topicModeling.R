@@ -65,7 +65,7 @@ performTopicModeling <- function(data, removeWordVector, nTopics, nTerms) {
 
 #Example
 cameron <- read.csv("~/TUE/Quartile1/IRandDM/SentimentAnalysis/WebIR-Full/Data/tweets_CAM.csv", sep = ",")
-removeWordVector = c("david", "cameron", "camerons", "miliband", "will", "can", "ge2015")
+removeWordVector = c("david", "cameron", "camerons", "miliband", "will", "can", "ge2015", "david_cameron", "ed_miliband")
 performTopicModeling(data = cameron, 
                      removeWordVector = removeWordVector,
                      nTopics = 5,

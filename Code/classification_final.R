@@ -38,7 +38,7 @@ removeHashTag <- function(x)
   gsub('#\\S+\\s*',' ', x)
 removeReference <- function(x)
   gsub('@\\S+', ' ', x)
-removeShortWords <- function(x) gsub("\\b[a-zA-Z0-9]{1,3}\\b", " ", x)
+removeShortWords <- function(x) gsub("\\b[a-zA-Z0-9]{1,2}\\b", " ", x)
 
 #START PREPROCESSING
 k <- length(rawTrainingData$Text)
