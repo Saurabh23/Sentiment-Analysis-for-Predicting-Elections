@@ -1,4 +1,24 @@
 #EXTRACT MOST FREQUENT TEMRS
+getBigramFrequencyList <- function(vectorSource, freq) {
+  myCorpus <- Corpus(vectorSource)
+  
+  bigramTokenizer <-
+    function(x) {
+      unlist(lapply(ngrams(words(x), 2), paste, collapse = " "), use.names = FALSE)
+    }
+  dtm <- DocumentTermMatrix(myCorpus, control = list(tokenizer=bigramTokenizer))
+  
+  dtm2 <- as.matrix(dtm)
+  frequency <- colSums(dtm2)
+  frequency <- sort(frequency, decreasing = TRUE)
+  head(frequency)
+  
+  top_frequency_terms <- subset(frequency, frequency >= freq)
+  top_frequency_terms <- as.list(rownames(as.matrix(top_frequency_terms)))
+  
+  return (top_frequency_terms)
+}
+
 getTermFrequencyList <- function(vectorSource, freq) {
   myCorpus <- Corpus(vectorSource)
   
@@ -15,16 +35,16 @@ getTermFrequencyList <- function(vectorSource, freq) {
   return (top_frequency_terms)
 }
 
-filterBigrams <- function(dtm, wordList) {
-  colnames <- colnames(dtm)
-  k <- length(colnames)
+
+filterBigrams <- function(bigrams, wordList) {
+  k <- length(bigrams)
   termList <- list()
   for (i in 1:k){
-    terms <- strsplit(colnames[i], " ")[[1]]
+    terms <- strsplit(as.character(bigrams[i]), " ")[[1]]
     if (grepl("\\d", terms[1]) || grepl("\\d", terms[2]) ) {
       next
     } else if (terms[1] %in% wordList|| terms[2] %in% wordList) {
-      termList[length(termList) + 1] <- colnames[i]
+      termList[length(termList) + 1] <- as.character(bigrams[i])
     }
   }
   return (termList)
@@ -77,7 +97,9 @@ performClassification <- function(rawTrainingData, method, isCrossValidation, lm
   pos = scan(
     "~/TUE/Quartile1/IRandDM/SentimentAnalysis/WebIR-Full/tweetsPreProcessing/data/positive-words.txt", what = 'character', comment.char = ';'
   )
-  neg
+  neg = scan(
+    "~/TUE/Quartile1/IRandDM/SentimentAnalysis/WebIR-Full/tweetsPreProcessing/data/negative-words.txt", what = 'character', comment.char = ';'
+  )
   
   posNegWords <- cbind(pos)
   posNegWords <- rbind(neg, pos)
@@ -132,11 +154,11 @@ performClassification <- function(rawTrainingData, method, isCrossValidation, lm
       }
     dtm <- DocumentTermMatrix(myCorpus, control = list(weighting=weightTfIdf, tokenize=bigramTokenizer))
     if (feature == "MFT") {
-      mostFrequentTerms <- getTermFrequencyList(trainingVector, 15)
-      bigramFrequentTerms <- filterBigrams(dtm, mostFrequentTerms)
+      bigramFrequenTerms <- getBigramFrequencyList(trainingVector, 10)
       dtmFromMostFrequentTerms <- dtm[, colnames(dtm)%in%bigramFrequentTerms]
     } else if (feature == "huliu") {
-      bigramFrequentTerms <- filterBigrams(dtm, posNegWords)
+      bigramFrequentTerms <- getBigramFrequencyList(trainingVector, 10)
+      bigramFrequentTerms <- filterBigrams(bigramFrequentTerms, posNegWords)
       dtmFromMostFrequentTerms <- dtm[, colnames(dtm)%in%bigramFrequentTerms]
     } else if (feature == "mix") {
       mostFrequentTerms <- getTermFrequencyList(trainingVector, 15)
@@ -155,24 +177,27 @@ performClassification <- function(rawTrainingData, method, isCrossValidation, lm
     } else if (feature == "mix") {
       mostFrequentTerms <- getTermFrequencyList(trainingVector, 15)
       dtmFromMostFrequentTerms <- dtm[, colnames(dtm)%in%mostFrequentTerms
-                                                           && colnames(dtm)%in%posNegWords]
+                                                           || colnames(dtm)%in%posNegWords]
     }
   } else if (lm == "mix") {
     bigramTokenizer <- function(x) {RWeka::NGramTokenizer(x, RWeka::Weka_control(min = 1, max = 2))}
     dtm <- DocumentTermMatrix(myCorpus, control = list(weighting=weightTfIdf, tokenize=bigramTokenizer))
     if (feature == "MFT") {
-      mostFrequentTerms <- getTermFrequencyList(trainingVector, 15)
-      bigramFrequentTerms <- filterBigrams(dtm, mostFrequentTerms)
-      dtmFromMostFrequentTerms <- dtm[, colnames(dtm)%in%bigramFrequentTerms]
+      mostFrequentTerms <- getTermFrequencyList(trainingVector, 20)
+      bigramFrequentTerms <- getBigramFrequencyList(trainingVector, 10)
+      dtmFromMostFrequentTerms <- dtm[, colnames(dtm)%in%bigramFrequentTerms
+                                      ||colnames(dtm)%in%mostFrequentTerms]
     } else if (feature == "huliu") {
-      bigramFrequentTerms <- filterBigrams(dtm, posNegWords)
-      dtmFromMostFrequentTerms <- dtm[, colnames(dtm)%in%bigramFrequentTerms]
+      bigramFrequentTerms <- getBigramFrequencyList(trainingVector, 10)
+      bigramFrequentTerms <- filterBigrams(bigramFrequentTerms, posNegWords)
+      dtmFromMostFrequentTerms <- dtm[, colnames(dtm)%in%bigramFrequentTerms
+                                      || colnames(dtm)%in%posNegWords]
     } else if (feature == "mix") {
       mostFrequentTerms <- getTermFrequencyList(trainingVector, 15)
-      bigramFrequentTerms1 <- filterBigrams(dtm, posNegWords)
-      bigramFrequentTerms2 <- filterBigrams(dtm, mostFrequentTerms)
-      dtmFromMostFrequentTerms <- dtm[, colnames(dtm)%in%bigramFrequentTerms1
-                                                           && colnames(dtm)%in%bigramFrequentTerms2]
+      bigramFrequentTerms <- getBigramFrequencyList(trainingVector, 10)
+      dtmFromMostFrequentTerms <- dtm[, colnames(dtm)%in%mostFrequentTerms
+                                                           || colnames(dtm)%in%bigramFrequentTerms
+                                      ||colnames(dtm)%in%posNegWords]
     }
   }
   
