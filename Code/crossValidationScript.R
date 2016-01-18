@@ -52,8 +52,8 @@ filterBigrams <- function(bigrams, wordList) {
 
 trainAndTest <- function(testingText, dataTrain, dataTest, foldSize, method) {
   if(method == "NB") {
-    model = naiveBayes(as.factor(dataTrain$Final.Sentiment)~., data = dataTrain, laplace = 0.3)
-    pred <- predict(model, dataTest, type = "class", threshold = 0.05)
+    model = naiveBayes(as.factor(dataTrain$Final.Sentiment)~., data = dataTrain, laplace = 0.03)
+    pred <- predict(model, dataTest, type = "class", threshold = 0.03, esp = 0)
     print(summary(pred))
     
   } else if(method == "SVM") {
@@ -82,16 +82,18 @@ trainAndTest <- function(testingText, dataTrain, dataTest, foldSize, method) {
   print(paste("the f1-score for positive and negative are ", f1scorepos, "and", f1scoreneg))
   print(confusionMatrix)
   
+  statistics <- list(accuracy, precisionpos, recallpos, precisionneg, recallneg, f1scorepos, f1scoreneg)
+  
   time <- timestamp()
   write.table(confusionMatrix, paste("~/Desktop/confusion-", method ,"-fold", as.String(time), ".txt"))
   
   result <- cbind(testingText, pred)
   time <- timestamp()
   write.csv(result, paste("~/Desktop/result" , as.String(time) ,".csv"), quote = T)
-  return (model)
+  return (statistics)
 }
 
-performClassification <- function(rawTrainingData, method, isCrossValidation, lm, feature) {
+performClassification <- function(rawTrainingData, method, isCrossValidation, lm, feature, isStem, isStopWord) {
   require(tm)
   require(e1071)
   pos = scan(
@@ -128,8 +130,21 @@ performClassification <- function(rawTrainingData, method, isCrossValidation, lm
     text <- removeURL(text)
     text <- removePunctuation(text)
     text <- stripWhitespace(text)
-    text <- removeWords(text, stopwords("en"))
-    text <- stemDocument(text, language = "english")
+    
+    if (isStopWord) {
+      text <- removeWords(text, stopwords("en"))
+    }
+    
+    #Stemming
+    if (isStem) {
+      text <- lapply(strsplit(text, " "), stemDocument, language = "english") [[1]]
+      newText <- ""
+      for (word in text) {
+        newText <- paste(newText, word)
+      }
+      text <- newText
+    }
+    
     textList[i] <- text
   }
   
@@ -207,6 +222,14 @@ performClassification <- function(rawTrainingData, method, isCrossValidation, lm
   len <- length(rawTrainingData$Text)
   foldSize <- len / 10
   
+  accuracies <- list()
+  posPrecisions <- list()
+  posRecalls <- list()
+  negPrecisions <- list()
+  negRecalls <- list()
+  posf1 <- list()
+  negf1 <- list()
+  
   if(isCrossValidation) {
     for (i in 1:10) {
       print(paste("training fold ", i))
@@ -221,6 +244,13 @@ performClassification <- function(rawTrainingData, method, isCrossValidation, lm
       print(paste("train size: ", length(dataTrain$Final.Sentiment)))
       
       model <- trainAndTest(testingText, dataTrain, dataTest, foldSize, method)
+      accuracies[length(accuracies) + 1] <- model[1]
+      posPrecisions[length(posPrecisions) + 1] <- model[2]
+      negPrecisions[length(negPrecisions) + 1] <- model[3]
+      posRecalls[length(posRecalls) + 1] <- model[4]
+      negRecalls[length(negRecalls) + 1] <- model[5]
+      posf1[length(posf1) + 1] <- model[6]
+      negf1[length(negf1) + 1] <- model[7]
     }
   }else {
     print("training ...")
@@ -234,5 +264,25 @@ performClassification <- function(rawTrainingData, method, isCrossValidation, lm
     model <- trainAndTest(testingText, dataTrain, dataTest, foldSize, method)
   }
   
+  print(paste("mean accuracy = ", mean(as.numeric(accuracies))))
+  print(paste("sd accuracy = ", sd(as.numeric(accuracies))))
+  
+  print(paste("mean pos precision= ", mean(as.numeric(posPrecisions))))
+  print(paste("sd pos precision= ", sd(as.numeric(posPrecisions))))
+  
+  print(paste("mean pos recall = ", mean(as.numeric(posRecalls))))
+  print(paste("sd pos recall = ", sd(as.numeric(posRecalls))))
+  
+  print(paste("mean neg precision = ", mean(as.numeric(negPrecisions))))
+  print(paste("sd neg precision = ", sd(as.numeric(negPrecisions))))
+  
+  print(paste("mean neg recall = ", mean(as.numeric(negRecalls))))
+  print(paste("sd neg recall = ", sd(as.numeric(negRecalls))))
+  
+  print(paste("mean pos f1 = ", mean(as.numeric(posf1))))
+  print(paste("sd pos f1 = ", sd(as.numeric(posf1))))
+  
+  print(paste("mean neg f1 = ", mean(as.numeric(negf1))))
+  print(paste("sd pos f1 = ", sd(as.numeric(negf1))))
   return (model)
 }
