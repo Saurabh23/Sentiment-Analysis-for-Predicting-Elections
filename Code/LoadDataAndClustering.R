@@ -3,26 +3,25 @@ library(tm)
 cameron <- read.csv("~/TUE/Quartile1/IRandDM/SentimentAnalysis/WebIR-Full/Data/tweets_CAM.csv", sep = ",")
 miliband <- read.csv("~/TUE/Quartile1/IRandDM/SentimentAnalysis/WebIR-Full/Data/Milliband_Tweet.csv", sep = ",")
 
-k <- length(cameron$Text) + length(miliband$Text)
-list <- list()
-for(i in 1:k) {
-  tweet <- ""
-  if (i <= length(cameron$Text)) {
-    tweet <- as.String(cameron$Text[i])
-  } else {
-    tweet <- as.String(miliband$Text[i])
-  }
-  list[i] <- tweet
+k = length(cameron$Text)
+textList <- list()
+for(i in 1: k){
+  #text <- as.String(rawTrainingData$Text[i])
+  text <- cameron$Text[i]
+  text <- iconv(text, to = 'UTF-8', sub = 'byte')
+  text <- removeHashTag(text)
+  text <- removeReference(text)
+  text <- removeShortWords(text)
+  text <- removeURL(text)
+  text <- removePunctuation(text)
+  text <- stripWhitespace(text)
+  text <- removeWords(text, stopwords("en"))
+  text <- removeWords(text, removeWordVector)
+  text <- tolower(text)
+  textList[i] <- text
 }
 
-text <- lapply(list, factor)
-text <- as.factor(text)
-text <- cameron$Text
-cameronVector <- VectorSource(cameron$Text)
-milibandVector <- VectorSource(miliband$Text)
-vector <- VectorSource(text)
-
-myCorpus <- Corpus(vector)
+myCorpus <- Corpus(cameronVector)
 
 myCorpus <- tm_map(myCorpus,
                    content_transformer(function(x)

@@ -6,30 +6,29 @@ performTopicModeling <- function(data, removeWordVector, nTopics, nTerms) {
   require(topicmodels)
   require(ggplot2)
   
-  vector <- VectorSource(data$Text)
+  
+	k <- length(data$Text)
+	textList <- list()
+	for(i in 1: k){
+		text <- data$Text[i]
+		text <- iconv(text, to = 'UTF-8', sub = 'byte')
+		text <- tolower(text)
+		text <- removeHashTag(text)
+		text <- removeReference(text)
+		text <- removeShortWords(text)
+		text <- removeURL(text)
+		text <- removePunctuation(text)
+		text <- stripWhitespace(text)
+		text <- removeWords(text, stopwords("en"))
+		text <- removeWords(text, removeWordVector)
+		textList[i] <- text
+	}
+	
+	processedTrainingData <- data.frame(matrix(unlist(textList), nrow = k, byrow = T))
+	colnames(processedTrainingData) <- c("Text")
+	
+  vector <- VectorSource(processedTrainingData$Text)
   myCorpus <- Corpus(vector)
-  
-  #pre-processing
-  myCorpus <- tm_map(myCorpus,
-                     content_transformer(function(x)
-                       iconv(x, to = 'UTF-8', sub = 'byte')),
-                     mc.cores = 1)
-  myCorpus <-
-    tm_map(myCorpus, content_transformer(removeURL), lazy = T)
-  myCorpus <-
-    tm_map(myCorpus, content_transformer(removeReference), lazy = T)
-  myCorpus <-
-    tm_map(myCorpus, content_transformer(removeHashTag), lazy = T)
-  
-  myCorpus <- tm_map(myCorpus, removePunctuation, lazy = T)
-  myCorpus <- tm_map(myCorpus, stripWhitespace, lazy = T)
-  myCorpus <-
-    tm_map(myCorpus, removeWords, stopwords("en"), lazy = T)
-  myCorpus <-
-    tm_map(myCorpus, removeWords, removeWordVector, lazy = T)
-  myCorpus <-
-    tm_map(myCorpus, content_transformer(tolower), lazy = T)
-  
   #create dtm, remove empty rows
   dtm <- DocumentTermMatrix(myCorpus)
   dtm <- removeSparseTerms(dtm, 0.99)
@@ -65,8 +64,13 @@ performTopicModeling <- function(data, removeWordVector, nTopics, nTerms) {
 
 #Example
 cameron <- read.csv("~/TUE/Quartile1/IRandDM/SentimentAnalysis/WebIR-Full/Data/tweets_CAM.csv", sep = ",")
-removeWordVector = c("david", "cameron", "camerons", "miliband", "will", "can", "ge2015")
-performTopicModeling(data = cameron, 
+miliband <- read.csv("~/TUE/Quartile1/IRandDM/SentimentAnalysis/WebIR-Full/Data/Milliband_Tweet.csv", sep = ",")
+removeWordVector = c("david", "cameron", "camerons", "miliband", 
+                     "will", "can", "ge2015", "david_cameron", "ed_miliband",
+                     "the", "davidcameron", "edmiliband",
+                     "2015", "tory", "tories", "snp", "via", "don", "just", "com",
+                     "election")
+performTopicModeling(data = miliband, 
                      removeWordVector = removeWordVector,
-                     nTopics = 5,
+                     nTopics = 7,
                      nTerms = 4)
