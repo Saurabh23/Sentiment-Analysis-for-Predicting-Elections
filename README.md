@@ -80,8 +80,7 @@ removeWordVector = c("david", "cameron", "camerons", "miliband",
 getHCDendogram(cameron, 0.98, removeWordVector)
 ```
 * clustering_final_v2.R: 
-* 
-In this version of file, clustering has been done with different distance, the steps in the file has been done manually.
+In this version of file, clustering has been done with different distance, the steps in the file are done manually.
 ```
 cameron <- read.csv("~/TUE/Quartile1/IRandDM/SentimentAnalysis/WebIR-Full/Data/tweets_CAM.csv", sep = ",", quote = '\"')
 removeWordVector = c("david", "cameron", "camerons", "miliband", 
