@@ -97,3 +97,4 @@ removingWords <- removeWordVector ## Use this for removing the specific words
 ## use the distance, check which one is needed and make distance matrix
 ## change the parameters in hclust
 ```
+For analysis, different distance steps and different merging steps are executed line by line.
