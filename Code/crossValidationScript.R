@@ -127,7 +127,7 @@ trainAndTest <- function(testingText, dataTrain, dataTest, foldSize, method) {
 #   prediction <- prediction(pred.df$positive, dataTest$Final.Sentiment, label.ordering = NULL)
 #   perf <- performance(prediction, "tpr", "fpr")
 #   plot(perf)
-  return (statistics)
+  return (model)
 }
 
 performClassification <- function(rawTrainingData, method, isCrossValidation, lm, feature, isStem, isStopWord) {
@@ -144,7 +144,7 @@ performClassification <- function(rawTrainingData, method, isCrossValidation, lm
   posNegWords <- rbind(neg, pos)
   rm(neg, pos)
   posNegWords <- as.list(posNegWords)
-  stopwords <- scan("~/Desktop/stopwords.txt", what = 'character')
+  stopwords <- scan("~/TUE/Quartile1/IRandDM/SentimentAnalysis/WebIR-Full/Data/stopwords.txt", what = 'character')
   
   #Pre-processing methods
   removeURL <- function(x)
@@ -305,6 +305,7 @@ performClassification <- function(rawTrainingData, method, isCrossValidation, lm
     model <- trainAndTest(testingText, dataTrain, dataTest, foldSize, method)
   }
   
+# UNCOMMENT AND CHANGE THE RETURN VALUE OF THE trainAndTest FUNCTION TO statistics TO GET THE STATISTICS
 #   print(paste("mean accuracy = ", mean(as.numeric(accuracies))))
 #   print(paste("sd accuracy = ", sd(as.numeric(accuracies))))
 #   

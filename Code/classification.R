@@ -4,7 +4,7 @@ library(tm)
 library(e1071)
 
 rawTrainingData <- read.csv("~/TUE/Quartile1/IRandDM/SentimentAnalysis/WebIR-Full/Data/SemEvalWithoutNeutral.csv", sep = ",")
-rawTrainingData <- read.csv("~/TUE/Quartile1/IRandDM/SentimentAnalysis/WebIR-Full/Data/Milliband_Tweet.csv-sorted.csv", sep = ",", quote = '\"')
+rawTrainingData <- read.csv("~/TUE/Quartile1/IRandDM/SentimentAnalysis/WebIR-Full/Data/cameron-tweet-sorted.csv", sep = ",", quote = '\"')
 rawTrainingData <- rawTrainingData[1:5000,]
 
 pos = scan(
@@ -31,6 +31,7 @@ removeReference <- function(x)
   gsub('@\\S+', ' ', x)
 removeShortWords <- function(x) gsub("\\b[a-zA-Z0-9]{1,2}\\b", " ", x)
 
+stopwords <- scan("~/TUE/Quartile1/IRandDM/SentimentAnalysis/WebIR-Full/Data/stopwords.txt", what = 'character')
 k <- length(rawTrainingData$Text)
 textList <- list()
 for(i in 1: k){
@@ -67,7 +68,7 @@ colnames(processedTrainingData) <- c("Text")
 
 #remove variables
 rm(text.df, text, textList, i)
-processedTrainingData1 <- as.data.frame(processedTrainingData[8001:16111,])
+processedTrainingData1 <- as.data.frame(processedTrainingData[8001:16820,])
 colnames(processedTrainingData1) <- c("Text")
   
 #VECTOR OF THE TWEETS
@@ -104,7 +105,7 @@ pred_prob <- predict(model, data_test, type = "raw", threshold = 0.03, eps = 0)
 pred.df <- as.data.frame(pred)
 
 sent <- list()
-for (i in 1:8000) {
+for (i in 1:8820) {
   if (pred.df$positive[i] == 1) {
     sent[i] <- "positive"
   } else if (pred.df$negative[i] > 0.5){
