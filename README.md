@@ -79,4 +79,21 @@ removeWordVector = c("david", "cameron", "camerons", "miliband",
                      "2015", "tory", "tories", "snp", "via", "don", "just", "com")
 getHCDendogram(cameron, 0.98, removeWordVector)
 ```
+* clustering_final_v2.R: 
+In this version of file, clustering has been done with different distance, the steps in the file are done manually.
+```
+cameron <- read.csv("~/TUE/Quartile1/IRandDM/SentimentAnalysis/WebIR-Full/Data/tweets_CAM.csv", sep = ",", quote = '\"')
+removeWordVector = c("david", "cameron", "camerons", "miliband", 
+                     "will", "can", "ge2015", "david_cameron", "ed_miliband",
+                     "the", "davidcameron", "edmiliband",
+                     "2015", "tory", "tories", "snp", "via", "don", "just", "com")
+sparseThreshold <- 0.993  ## Pass the sparse values here
+removingWords <- removeWordVector ## Use this for removing the specific words
 
+## After these steps goto corresponding function and execute the preprocessing
+## execute the code line for corpus
+## execute the lines for term document matrix
+## use the distance, check which one is needed and make distance matrix
+## change the parameters in hclust
+```
+For analysis, different distance steps and different merging steps are executed line by line.
