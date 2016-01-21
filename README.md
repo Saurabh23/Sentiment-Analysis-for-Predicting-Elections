@@ -17,14 +17,22 @@ We use the Java program, in "SearchTwitter" folder, to fetch the Twitter data vi
 
 * tweets_CAM.csv: All tweets containing "David Cameron" from April to May, 2015 
 * Milliband_Tweet.csv: All tweets containing "Ed Miliband" from April to May, 2015 
+* miliband-tweet-sorted.csv: All tweets containing "Ed Miliband" from April to May, 2015, sorted by users and the tweets of same users are grouped in to documents.
+* cameron-tweet-sorted.csv: All tweets containing "David Cameron" from April to May, 2015, sorted by users and the tweets of same users are grouped in to documents.
+
 ## Experiment Script
 All the codes are in the folder "./Code". These are the important files:
 
-* classification.R: The script for training and testing classification (e.g. Naive Bayes). These following lines need to be modified depending on the context.
+* classification.R: The script for training and testing classification (e.g. Naive Bayes). These following lines need to be modified depending on the context. If you would like to use a model to predict the sentiment of a new dataset, please use this script.
 
 Change the path to your training data.
 ```
 rawTrainingData <- read.csv("~/TUE/Quartile1/IRandDM/SentimentAnalysis/WebIR-Full/Data/SemEvalProcessed.csv", sep = ",")
+```
+
+Change the path to the stop-word list
+```
+stopwords <- scan("~/TUE/Quartile1/IRandDM/SentimentAnalysis/WebIR-Full/Data/stopwords.txt", what = 'character')
 ```
 
 Change the "~/TUE/Quartile1/IRandDM/SentimentAnalysis" path to the folder containing the repo.
