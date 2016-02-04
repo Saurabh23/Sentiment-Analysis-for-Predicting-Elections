@@ -66,7 +66,7 @@ performTopicModeling <- function(data, removeWordVector, nTopics, nTerms) {
 cameron <- read.csv("~/TUE/Quartile1/IRandDM/SentimentAnalysis/WebIR-Full/Data/tweets_CAM.csv", sep = ",")
 miliband <- read.csv("~/TUE/Quartile1/IRandDM/SentimentAnalysis/WebIR-Full/Data/Milliband_Tweet.csv", sep = ",")
 removeWordVector = c("david", "cameron", "camerons", "miliband", 
-                     "will", "can", "ge2015", "david_cameron", "ed_miliband",
+                     "can", "ge2015", "david_cameron", "ed_miliband",
                      "the", "davidcameron", "edmiliband",
                      "2015", "tory", "tories", "snp", "via", "don", "just", "com",
                      "election")
